@@ -53,10 +53,32 @@ def on_closing():
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
-f = Frame(root, relief=GROOVE, bd=1)
-f.grid(column=0, row=0,padx=10, pady=10)
+# f = Frame(root, relief=GROOVE, bd=1)
+# f.grid(column=0, row=0,padx=10, pady=10)
 
+from tkinter import ttk
 
+container = ttk.Frame(root)
+container.pack(side=LEFT)
+
+canvas = tk.Canvas(container, width=1500, height=800, background='gray75')
+scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+scrollable_frame = ttk.Frame(canvas)
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+container.pack()
+canvas.pack(side="left", fill="both", expand=True)
+
+scrollbar.pack(side="right", fill="y")
 
 
 
@@ -66,14 +88,14 @@ email_widgets = []
 def update_email_grid(email_content):
     # Create a new Frame for the email content
     # frame = Frame(f)
-    frame = Frame(f)
+    frame = Frame(scrollable_frame)
 
     col = len(email_widgets) % 5
     row = len(email_widgets) // 5
     frame.grid(column=col, row=row, padx=10, pady=10)
 
     # Create a Text widget to display the email content
-    email_text = Text(frame, wrap='none', height=10, width=30)
+    email_text = Text(frame, wrap='none', height=20, width=30)
     email_text.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
 
     # Create a Scrollbar for the Text widget
@@ -105,7 +127,7 @@ def repeat(service, prev_ids):
                 received_email_num = ids.index(prev_ids[0])
                 print('received_email_num: ', received_email_num)
 
-                if received_email_num == 0:
+                if received_email_num > 0:
                     for ind in range(10, 0, -1):
                         new_msg = service.users().messages().get(userId='me', id=ids[ind - 1]).execute()
                         
@@ -136,9 +158,8 @@ def repeat(service, prev_ids):
 
                                 new_email_content = body.split('href="')[1].split(' ')[0]
                                 
-                                # webbrowser.open_new_tab(new_email_content)
-                                # email_widgets.append(new_email_content)
-                                # update_email_grid(new_email_content)
+                                webbrowser.open_new_tab(new_email_content)
+
 
                             else:
                                 # body = str(body)
