@@ -84,32 +84,47 @@ scrollbar.pack(side="right", fill="y")
 
 
 email_widgets = []
-
+widgets = []
 def update_email_grid(email_content):
     # Create a new Frame for the email content
     # frame = Frame(f)
     frame = Frame(scrollable_frame)
+    frame.grid()
 
     col = len(email_widgets) % 5
     row = len(email_widgets) // 5
-    frame.grid(column=col, row=row, padx=10, pady=10)
+
+    total_rows = len(email_widgets) // 5
+    reversed_row = total_rows - row - 1
+
+    # frame.grid(column=col, row=row, padx=10, pady=10)
+    
+    
 
     # Create a Text widget to display the email content
     email_text = Text(frame, wrap='none', height=20, width=30)
-    email_text.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+    # email_text.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+    email_text.grid()
 
     # Create a Scrollbar for the Text widget
     scrollbar = Scrollbar(frame, command=email_text.yview)
-    scrollbar.grid(row=0, column=1, padx=5, pady=5, sticky='ns')
+    # scrollbar.grid(row=0, column=1, padx=5, pady=5, sticky='ns')
+    scrollbar.grid()
     email_text['yscrollcommand'] = scrollbar.set
 
     # Insert the email content into the Text widget
     email_text.insert('1.0', email_content)
 
-
+    widgets.insert(0, frame)
     # Update the GUI
-    frame.update_idletasks()
-    root.update()
+    # frame.update_idletasks()
+    # root.update()
+
+    num_columns = 5
+    for i, widget in enumerate(widgets):
+        row = i // num_columns
+        col = i % num_columns
+        widget.grid(row=row, column=col, padx=10, pady=10)
 
 def repeat(service, prev_ids):
     
@@ -127,7 +142,7 @@ def repeat(service, prev_ids):
                 received_email_num = ids.index(prev_ids[0])
                 print('received_email_num: ', received_email_num)
 
-                if received_email_num > 0:
+                if received_email_num == 0:
                     for ind in range(10, 0, -1):
                         new_msg = service.users().messages().get(userId='me', id=ids[ind - 1]).execute()
                         
@@ -158,12 +173,13 @@ def repeat(service, prev_ids):
 
                                 new_email_content = body.split('href="')[1].split(' ')[0]
                                 
-                                webbrowser.open_new_tab(new_email_content)
+                                # webbrowser.open_new_tab(new_email_content)
 
 
                             else:
                                 # body = str(body)
                                 new_email_content = body
+                                print(body)
                                 email_widgets.append(new_email_content)
                                 update_email_grid(new_email_content)
 
